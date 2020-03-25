@@ -4,7 +4,9 @@
 
 #include <cstddef>
 #include <string>
+#include <vector>
 #include <array>
+#include <initializer_list>
 
 #if __cplusplus >= 201703L
 #include <string_view>
@@ -377,8 +379,70 @@ namespace std {
 
 
 namespace chineseroom {
-  
-  
+
+
+namespace detail {
+
+  template<typename S> void split(S const& source, char separator, std::vector<S>& splitted, bool strict) {
+    splitted.clear();
+    typename S::const_iterator start = source.begin();
+    typename S::const_iterator end = source.end();
+    typename S::const_iterator next = std::find(start, end, separator);
+    while(next != end) {
+      if(next - start > 0 || strict)
+        splitted.emplace_back(S{start, next});
+      start = next + 1;
+      next = std::find(start, end, separator);
+    }
+    if(next - start > 0 || strict)
+      splitted.emplace_back(S{start, next});
+  }
+
+}
+
+
+
+inline void split_strictly(std::string const& source, char separator, std::vector<std::string>& splitted) {
+  detail::split(source, separator, splitted, true);
+}
+
+template<int N> void split_strictly(fixed_string<N> const& source, char separator, std::vector<fixed_string<N>>& splitted) {
+  detail::split(source, separator, splitted, true);
+}
+
+inline std::vector<std::string> split_strictly(std::string const& source, char separator) {
+  std::vector<std::string> splitted;
+  split_strictly(source, separator, splitted);
+  return splitted;
+}
+
+template<int N> std::vector<fixed_string<N>> split_strictly(fixed_string<N> const& source, char separator) {
+  std::vector<fixed_string<N>> splitted;
+  split_strictly(source, separator, splitted);
+  return splitted;
+}
+
+inline void split(std::string const& source, char separator, std::vector<std::string>& splitted) {
+  detail::split(source, separator, splitted, false);
+}
+
+template<int N> void split(fixed_string<N> const& source, char separator, std::vector<fixed_string<N>>& splitted) {
+  detail::split(source, separator, splitted, false);
+}
+
+inline std::vector<std::string> split(std::string const& source, char separator) {
+  std::vector<std::string> splitted;
+  split(source, separator, splitted);
+  return splitted;
+}
+
+template<int N> std::vector<fixed_string<N>> split(fixed_string<N> const& source, char separator) {
+  std::vector<fixed_string<N>> splitted;
+  split(source, separator, splitted);
+  return splitted;
+}
+
+
 
 inline bool has_wildcards(char const* chars) {
   
@@ -387,7 +451,7 @@ inline bool has_wildcards(char const* chars) {
   
   for(char const* c = chars; *c != '\0'; ++c)
     switch(*c) {
-      case '*': case '?':
+      case '*': case '?': case '!':
         return true;
       default:
         continue;
@@ -422,6 +486,12 @@ inline bool matched(char const* pattern, char const* text) {
   
   char const* last_text = nullptr;
   char const* last_pattern = nullptr;
+  bool without_negation = true;
+
+  if(*pattern == '!') {
+    without_negation = false;
+    ++pattern;
+  }
   
   while(*text != '\0')
     switch(*pattern) {
@@ -443,7 +513,7 @@ inline bool matched(char const* pattern, char const* text) {
         } else {
           // if no stars we fail to match
           if (last_pattern == nullptr)
-            return false;
+            return without_negation ? false : true;
           // star-loop: backtrack to the last * by restoring the backup positions 
           // in the pattern and text
           text = ++last_text;
@@ -457,9 +527,9 @@ inline bool matched(char const* pattern, char const* text) {
   
   // at end of text means success if nothing else is left to match
   if(*pattern != '\0')
-    return false;
+    return without_negation ? false : true;
   
-  return true;
+  return without_negation ? true : false;
 }
 
 
@@ -467,20 +537,139 @@ inline bool matched(char const* pattern, char const* text) {
 inline bool matched(char const* pattern, std::string const& text) {
   return matched(pattern, text.data());
 }
+
 template<int N> bool matched(char const* pattern, fixed_string<N> const& text) {
   return matched(pattern, text.data());
 }
+
 inline bool matched(std::string const& pattern, char const* text) {
   return matched(pattern.data(), text);
 }
+
 template<int N> bool matched(fixed_string<N> const& pattern, char const* text) {
   return matched(pattern.data(), text);
 }
+
 template<int N> bool matched(std::string const& pattern, fixed_string<N> const& text) {
   return matched(pattern.data(), text.data());
 }
+
 template<int N> bool matched(fixed_string<N> const& pattern, std::string const& text) {
   return matched(pattern.data(), text.data());
+}
+
+inline bool matched_list(std::initializer_list<char const*> const& patterns, char const* text) {
+  for(auto const& each_pattern: patterns)
+    if(!matched(each_pattern, text))
+      return false;
+  return true;
+}
+
+inline bool matched_list(std::initializer_list<char const*> const& patterns, std::string const& text) {
+  matched_list(patterns, text.data());
+}
+
+template<int N> bool matched_list(std::initializer_list<char const*> const& patterns, fixed_string<N> const& text) {
+  matched_list(patterns, text.data());
+}
+
+inline bool matched_list(std::initializer_list<std::string> const& patterns, char const* text) {
+  for(auto const& each_pattern: patterns)
+    if(!matched(each_pattern, text))
+      return false;
+  return true;
+}
+
+inline bool matched_list(std::initializer_list<std::string> const& patterns, std::string const& text) {
+  matched_list(patterns, text.data());
+}
+
+template<int N> bool matched_list(std::initializer_list<std::string> const& patterns, fixed_string<N> const& text) {
+  matched_list(patterns, text.data());
+}
+
+template<int N> bool matched_list(std::initializer_list<fixed_string<N>> const& patterns, char const* text) {
+  for(auto const& each_pattern: patterns)
+    if(!matched(each_pattern, text))
+      return false;
+  return true;
+}
+
+template<int N> bool matched_list(std::initializer_list<fixed_string<N>> const& patterns, std::string const& text) {
+  return matched_list(patterns, text.data());
+}
+
+template<int N, int M> bool matched_list(std::initializer_list<fixed_string<N>> const& patterns, fixed_string<M> const& text) {
+  return matched_list(patterns, text.data());
+}
+
+inline bool matched_list(std::vector<char const*> const& patterns, char const* text) {
+  for(auto const& each_pattern: patterns)
+    if(!matched(each_pattern, text))
+      return false;
+  return true;
+}
+
+inline bool matched_list(std::vector<char const*> const& patterns, std::string const& text) {
+  matched_list(patterns, text.data());
+}
+
+template<int N> bool matched_list(std::vector<char const*> const& patterns, fixed_string<N> const& text) {
+  matched_list(patterns, text.data());
+}
+
+inline bool matched_list(std::vector<std::string> const& patterns, char const* text) {
+  for(auto const& each_pattern: patterns)
+    if(!matched(each_pattern, text))
+      return false;
+  return true;
+}
+
+inline bool matched_list(std::vector<std::string> const& patterns, std::string const& text) {
+  matched_list(patterns, text.data());
+}
+
+template<int N> bool matched_list(std::vector<std::string> const& patterns, fixed_string<N> const& text) {
+  matched_list(patterns, text.data());
+}
+
+template<int N> bool matched_list(std::vector<fixed_string<N>> const& patterns, char const* text) {
+  for(auto const& each_pattern: patterns)
+    if(!matched(each_pattern, text))
+      return false;
+  return true;
+}
+
+template<int N> bool matched_list(std::vector<fixed_string<N>> const& patterns, std::string const& text) {
+  return matched_list(patterns, text.data());
+}
+
+template<int N, int M> bool matched_list(std::vector<fixed_string<N>> const& patterns, fixed_string<M> const& text) {
+  return matched_list(patterns, text.data());
+}
+
+inline bool matched_list(std::string const& patterns, char const* text) {
+  return matched_list(split(patterns, ','), text);
+}
+
+inline bool matched_list(std::string const& patterns, std::string const& text) {
+  return matched_list(split(patterns, ','), text);
+}
+
+template<int N> bool matched_list(std::string const& patterns, fixed_string<N> const& text) {
+  return matched_list(split(patterns, ','), text);
+}
+
+template<int N> bool matched_list(fixed_string<N> const& patterns, char const* text) {
+  return matched_list(split(patterns, ','), text);
+}
+
+template<int N> bool matched_list(fixed_string<N> const& patterns, std::string const& text) {
+  return matched_list(split(patterns, ','), text);
+}
+
+template<int N, int M> bool matched_list(fixed_string<N> const& patterns, fixed_string<M> const& text) {
+  return matched_list(split(patterns, ','), text);
 }
 
 
