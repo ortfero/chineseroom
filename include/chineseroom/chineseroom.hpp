@@ -502,9 +502,12 @@ namespace detail {
     if(chars == nullptr)
       return false;
 
+    if(*chars == '!')
+      return true;
+
     for(C const* c = chars; *c != '\0'; ++c)
       switch(*c) {
-        case '*': case '?': case '!':
+        case '*': case '?':
           return true;
         default:
           continue;
