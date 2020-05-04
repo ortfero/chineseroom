@@ -229,7 +229,7 @@ namespace chineseroom {
     }
 
     void push_back(char c) noexcept {
-      //if(n_ >= N) return; p_[n_++] = c; p_[n_] = '\0';
+      if(n_ >= N) return; p_[n_++] = c; p_[n_] = '\0';
     }
 
     void pop_back() noexcept {

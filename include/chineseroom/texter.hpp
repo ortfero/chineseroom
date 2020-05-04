@@ -18,22 +18,6 @@ namespace chineseroom {
 
     using size_type = size_t;
 
-
-    struct formatters {
-
-      struct fixed_fp {
-
-        friend struct basic_texter;
-
-        unsigned precision;
-
-        void print(basic_texter& t, double x) const {
-          t.print_float(x, precision);
-        }
-      }; // fixed_fp
-
-    }; // formatters
-
     static constexpr auto default_precision = 6;
 
     basic_texter() noexcept = default;
@@ -45,6 +29,7 @@ namespace chineseroom {
     S const& string() const noexcept { return string_; }
     char const* data() const noexcept { return string_.data(); }
     size_type size() const noexcept { return string_.size(); }
+    bool empty() const noexcept { return string_.empty(); }
     void clear() noexcept { string_.clear(); }
 
 
@@ -149,7 +134,8 @@ namespace chineseroom {
 
     template<size_t N > friend
     basic_texter& operator << (basic_texter& p, char const (&s)[N]) {
-      return p.out(s, N - 1);
+      p.string_.append(s, N - 1);
+      return p;
     }
 
 

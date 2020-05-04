@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <string_view>
+#include "fixed_string.hpp"
 
 
-namespace hydra {
+namespace chineseroom {
   
   
 namespace detail {
@@ -57,11 +59,12 @@ inline std::vector<std::wstring> split_strictly(std::wstring const& source, wcha
   return splitted;
 }
 
-template<int N> std::vector<fixed_string<N>> split_strictly(fixed_string<N> const& source, char separator) {
-  std::vector<fixed_string<N>> splitted;
-  split_strictly(source, separator, splitted);
-  return splitted;
-}
+template<int N> std::vector<fixed_string<N>>
+  split_strictly(fixed_string<N> const& source, char separator) {
+    std::vector<fixed_string<N>> splitted;
+    split_strictly(source, separator, splitted);
+    return splitted;
+  }
 
 inline void split(std::string const& source, char separator, std::vector<std::string>& splitted) {
   detail::split(source, separator, splitted, false);
@@ -94,4 +97,4 @@ template<int N> std::vector<fixed_string<N>> split(fixed_string<N> const& source
 }
 
 
-} // hydra
+} // chineseroom

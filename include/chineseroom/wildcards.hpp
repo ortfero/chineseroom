@@ -1,6 +1,11 @@
 #pragma once
 
 
+#include <string>
+#include "fixed_string.hpp"
+#include "split.hpp"
+
+
 namespace chineseroom {
   
   
