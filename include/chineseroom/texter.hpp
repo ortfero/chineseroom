@@ -14,17 +14,17 @@ namespace chineseroom {
 
 
   template<typename S>
-  struct basic_texter {
+  struct texter {
 
     using size_type = size_t;
 
     static constexpr auto default_precision = 6;
 
-    basic_texter() noexcept = default;
-    basic_texter(basic_texter const&) = default;
-    basic_texter& operator = (basic_texter const&) = default;
-    basic_texter(basic_texter&&) noexcept = default;
-    basic_texter& operator = (basic_texter&&) noexcept = default;
+    texter() noexcept = default;
+    texter(texter const&) = default;
+    texter& operator = (texter const&) = default;
+    texter(texter&&) noexcept = default;
+    texter& operator = (texter&&) noexcept = default;
 
     S const& string() const noexcept { return string_; }
     char const* data() const noexcept { return string_.data(); }
@@ -53,147 +53,189 @@ namespace chineseroom {
     }
 
 
-    basic_texter& out(char const* cc, size_type n) {
+    texter& out(char const* cc, size_type n) {
       string_.append(cc, n);
       return *this;
     }
 
 
-    template<typename F, typename Arg> basic_texter& as(Arg&& arg, F const& f = F{}) {
+    template<typename F, typename Arg> texter& as(Arg&& arg, F const& f = F{}) {
       f.print(*this, std::forward<Arg>(arg));
       return *this;
     }
 
 
-    basic_texter& print() {
+    texter& print() {
       return *this;
     }
 
 
     template<typename Arg, typename... Args>
-    basic_texter& print(Arg&& arg, Args&&... args) {
+    texter& print(Arg&& arg, Args&&... args) {
       (*this) << arg;
       print(std::forward<Args>(args)...);
       return *this;
     }
 
 
-    basic_texter& fixed(double x, unsigned precision) {
+    texter& fixed(double x, unsigned precision) {
       return print_fixed_float(x, precision);
     }
 
 
-    basic_texter& fixed(float x, unsigned precision) {
+    texter& fixed(float x, unsigned precision) {
       return print_fixed_float(x, precision);
     }
 
 
-    basic_texter& fixed(uint32_t x, unsigned width) {
+    texter& fixed(uint32_t x, unsigned width) {
       constexpr auto digits = 10;
       return print_fixed_int<digits>(x, width);
     }
 
 
-    basic_texter& fixed(int32_t x, unsigned width) {
+    texter& fixed(int32_t x, unsigned width) {
       constexpr auto digits = 11;
       return print_fixed_int<digits>(x, width);
     }
 
 
-    basic_texter& fixed(uint64_t x, unsigned width) {
+    texter& fixed(uint64_t x, unsigned width) {
       constexpr auto digits = 18;
       return print_fixed_int<digits>(x, width);
     }
 
 
-    basic_texter& fixed(int64_t x, unsigned width) {
+    texter& fixed(int64_t x, unsigned width) {
       constexpr auto digits = 19;
       return print_fixed_int<digits>(x, width);
     }
 
 
+    template<typename T> texter& quoted(T&& arg) {
+      string_.push_back('\'');
+      (*this) << arg;
+      string_.push_back('\'');
+      return *this;
+    }
+
+
+    template<typename T> texter& duoted(T&& arg) {
+      string_.push_back('\"');
+      (*this) << arg;
+      string_.push_back('\"');
+      return *this;
+    }
+
+
+    template<size_t N, typename... Pairs>
+    texter& attributes(char const (&text)[N], Pairs&&... pairs) {
+      string_.append(text, N - 1);
+      only_attributes(std::forward<Pairs>(pairs)...);
+      return *this;
+    }
+
+
+    texter& only_attributes() {
+      return *this;
+    }
+
+
+    template<size_t N, typename Arg, typename... Pairs>
+    texter& only_attributes(char const (&name)[N], Arg&& value, Pairs&&... pairs) {
+      string_.push_back(' ');
+      string_.push_back('{');
+      string_.append(name, N - 1);
+      string_.push_back(' ');
+      string_.push_back('=');
+      string_.push_back(' ');
+      format_value(std::forward<Arg>(value));
+      format_other_attributes(std::forward<Pairs>(pairs)...);
+      string_.push_back('}');
+      return *this;
+    }
+
 
     template<typename X>
-    friend basic_texter& operator << (basic_texter& p, basic_texter<X> const& q) {
+    friend texter& operator << (texter& p, texter<X> const& q) {
       p.string_.append(q.data(), q.size());
       return p;
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, char c) {
+    friend texter& operator << (texter& p, char c) {
       p.string_.push_back(c);
       return p;
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, char const* cc) {
+    friend texter& operator << (texter& p, char const* cc) {
       p.string_.append(cc);
       return p;
     }
 
 
     template<size_t N > friend
-    basic_texter& operator << (basic_texter& p, char const (&s)[N]) {
+    texter& operator << (texter& p, char const (&s)[N]) {
       p.string_.append(s, N - 1);
       return p;
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, std::string_view const& sv) {
+    friend texter& operator << (texter& p, std::string_view const& sv) {
       return p.out(sv.data(), sv.size());
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, std::string const& s) {
+    friend texter& operator << (texter& p, std::string const& s) {
       return p.out(s.data(), s.size());
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, bool x) {
+    friend texter& operator << (texter& p, bool x) {
       return x ? p.out("true", 4) : p.out("false", 5);
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, uint32_t x) {
+    friend texter& operator << (texter& p, uint32_t x) {
       constexpr auto digits = 10;
       return p.print_int<digits>(x);
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, int32_t x) {
+    friend texter& operator << (texter& p, int32_t x) {
       constexpr auto digits = 11;
       return p.print_int<digits>(x);
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, uint64_t x) {
+    friend texter& operator << (texter& p, uint64_t x) {
       constexpr auto digits = 18;
       return p.print_int<digits>(x);
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, int64_t x) {
+    friend texter& operator << (texter& p, int64_t x) {
       constexpr auto digits = 19;
       return p.print_int<digits>(x);
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, float x) {
+    friend texter& operator << (texter& p, float x) {
       return p.print_fixed_float(x, default_precision);
     }
 
 
-    friend basic_texter& operator << (basic_texter& p, double x) {
+    friend texter& operator << (texter& p, double x) {
       return p.print_fixed_float(x, default_precision);
     }
 
 
     template<size_t N>
-    friend basic_texter& operator << (basic_texter& p, fixed_string<N> const& fs) {
+    friend texter& operator << (texter& p, fixed_string<N> const& fs) {
       p.out(fs.data(), fs.size());
       return p;
     }
-
 
 
   private:
@@ -216,6 +258,70 @@ namespace chineseroom {
     }
 
 
+    void format_other_attributes()
+    { }
+
+
+    template<size_t N, typename Arg, typename... Pairs>
+    void format_other_attributes(char const (&name)[N], Arg&& value, Pairs&&... pairs) {
+      string_.push_back(',');
+      string_.push_back(' ');
+      string_.append(name, N - 1);
+      string_.push_back(' ');
+      string_.push_back('=');
+      string_.push_back(' ');
+      format_value(std::forward<Arg>(value));
+      format_other_attributes(std::forward<Pairs>(pairs)...);
+    }
+
+
+    void format_value(char c) {
+      string_.push_back('\'');
+      string_.push_back(c);
+      string_.push_back('\'');
+    }
+
+
+    template<size_t N> void format_value(char const (&literal)[N]) {
+      string_.push_back('\'');
+      string_.append(literal, N - 1);
+      string_.push_back('\'');
+    }
+
+
+    void format_value(char const* data) {
+      string_.push_back('\'');
+      string_.append(data);
+      string_.push_back('\'');
+    }
+
+
+    void format_value(std::string const& s) {
+      string_.push_back('\'');
+      string_.append(s.data(), s.size());
+      string_.push_back('\'');
+    }
+
+
+    template<size_t N> void format_value(fixed_string<N> const& s) {
+      string_.push_back('\'');
+      string_.append(s.data(), s.size());
+      string_.push_back('\'');
+    }
+
+
+    void format_value(std::string_view const& sv) {
+      string_.push_back('\'');
+      string_.append(sv.data(), sv.size());
+      string_.push_back('\'');
+    }
+
+
+    template<typename T> void format_value(T&& arg) {
+      (*this) << arg;
+    }
+
+
     char* allocate(unsigned& n) {
 
       size_type const old_size = string_.size();
@@ -235,13 +341,13 @@ namespace chineseroom {
     }
 
 
-    basic_texter& shrink(size_type n) {
+    texter& shrink(size_type n) {
       string_.resize(string_.size() - n);
       return *this;
     }
 
 
-    template<unsigned N, typename T> basic_texter& print_int(T x) {
+    template<unsigned N, typename T> texter& print_int(T x) {
       unsigned digits = N;
       char* buffer = allocate(digits);
       if(!buffer) return *this;
@@ -252,7 +358,7 @@ namespace chineseroom {
     }
 
 
-    template<unsigned N, typename T> basic_texter& print_fixed_int(T x, unsigned width) {
+    template<unsigned N, typename T> texter& print_fixed_int(T x, unsigned width) {
       if(width > N)
         width = N;
       unsigned digits = width;
@@ -275,7 +381,7 @@ namespace chineseroom {
     }
 
 
-    template<typename T> basic_texter& print_fixed_float(T x, unsigned precision) {
+    template<typename T> texter& print_fixed_float(T x, unsigned precision) {
       unsigned digits = 38;
       char* buffer = allocate(digits);
       if(!buffer) return *this;
@@ -430,13 +536,13 @@ namespace chineseroom {
   }; // texter
 
 
-  using std_texter = basic_texter<std::string>;
-  using short_texter = basic_texter<short_string>;
-  using texter = basic_texter<string>;
-  using long_texter = basic_texter<long_string>;
-  using page_texter = basic_texter<page_string>;
-  using dpage_texter = basic_texter<dpage_string>;
-  using large_texter = basic_texter<large_string>;
+  using dynamic_texter = texter<std::string>;
+  using short_texter = texter<short_string>;
+  using fixed_texter = texter<string>;
+  using long_texter = texter<long_string>;
+  using page_texter = texter<page_string>;
+  using dpage_texter = texter<dpage_string>;
+  using large_texter = texter<large_string>;
 
 
 } // chineseroom
