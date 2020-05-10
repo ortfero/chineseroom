@@ -128,21 +128,13 @@ namespace chineseroom {
     }
 
 
-    template<size_t N, typename... Pairs>
-    texter& attributes(char const (&text)[N], Pairs&&... pairs) {
-      string_.append(text, N - 1);
-      only_attributes(std::forward<Pairs>(pairs)...);
-      return *this;
-    }
-
-
-    texter& only_attributes() {
+    texter& attributes() {
       return *this;
     }
 
 
     template<size_t N, typename Arg, typename... Pairs>
-    texter& only_attributes(char const (&name)[N], Arg&& value, Pairs&&... pairs) {
+    texter& attributes(char const (&name)[N], Arg&& value, Pairs&&... pairs) {
       string_.push_back(' ');
       string_.push_back('{');
       string_.append(name, N - 1);
