@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(benchmark
   benchmark.cpp
-  "${PROJECT_SOURCE_DIR}/../thirdparty/source/format.cc"
 )
 
 target_include_directories(benchmark PUBLIC

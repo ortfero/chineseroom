@@ -21,8 +21,8 @@ TEST_CASE("pattern matching") {
   REQUIRE(chineseroom::matched("ab*ba", "abcdefba"));
   REQUIRE(chineseroom::matched("!ab?ba", "abba"));
   REQUIRE(chineseroom::matched("!ab*ba", "abcdefa"));
-  REQUIRE(chineseroom::matched_list({"ab*ba", "!abcdefba"}, "abba"));
+  REQUIRE(chineseroom::matched_any({"ab*ba", "!abcdefba"}, "abba"));
   REQUIRE(!chineseroom::matched("ab?ba", "abba"));
   REQUIRE(!chineseroom::matched("ab*ba", "abcdefa"));
-  REQUIRE(!chineseroom::matched_list(std::string{"ab*ba,!abcdefba"}, "abcdefba"));
+  REQUIRE(!chineseroom::matched_any(std::string{"ab*ba,!abcdefba"}, "abcdefba"));
 }

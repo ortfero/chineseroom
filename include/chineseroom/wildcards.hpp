@@ -1,8 +1,29 @@
+/* This file is part of chineseroom library
+ * Copyright 2020 Andrei Ilin <ortfero@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #pragma once
 
 
 #include <string>
-#include "fixed_string.hpp"
 #include "split.hpp"
 
 
@@ -48,11 +69,6 @@ inline bool has_wildcards(std::string const& s) {
 
 inline bool has_wildcards(std::wstring const& s) {
   return has_wildcards(s.data());
-}
-
-template<int N>
-bool has_wildcards(fixed_string<N> const& fs) {
-  return has_wildcards(fs.data());
 }
 
 
@@ -128,10 +144,6 @@ inline bool matched(char const* pattern, std::string const& text) {
   return matched(pattern, text.data());
 }
 
-template<int N> bool matched(char const* pattern, fixed_string<N> const& text) {
-  return matched(pattern, text.data());
-}
-
 inline bool matched(wchar_t const* pattern, wchar_t const* text) {
   return detail::matched(pattern, text);
 }
@@ -148,10 +160,6 @@ inline bool matched(std::string const& pattern, std::string const& text) {
   return matched(pattern.data(), text.data());
 }
 
-template<int N> bool matched(std::string const& pattern, fixed_string<N> const& text) {
-  return matched(pattern.data(), text.data());
-}
-
 inline bool matched(std::wstring const& pattern, wchar_t const* text) {
   return matched(pattern.data(), text);
 }
@@ -160,183 +168,108 @@ inline bool matched(std::wstring const& pattern, std::wstring const& text) {
   return matched(pattern.data(), text.data());
 }
 
-template<int N> bool matched(fixed_string<N> const& pattern, char const* text) {
-  return matched(pattern.data(), text);
-}
-
-template<int N> bool matched(fixed_string<N> const& pattern, std::string const& text) {
-  return matched(pattern.data(), text.data());
-}
-
-template<int N, int M> bool matched(fixed_string<N> const& pattern, fixed_string<M> const& text) {
-  return matched(pattern.data(), text.data());
-}
-
-
-inline bool matched_list(std::initializer_list<char const*> const& patterns, char const* text) {
+inline bool matched_any(std::initializer_list<char const*> const& patterns, char const* text) {
   for(auto const& each_pattern: patterns)
     if(!matched(each_pattern, text))
       return false;
   return true;
 }
 
-inline bool matched_list(std::initializer_list<char const*> const& patterns, std::string const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::initializer_list<char const*> const& patterns, std::string const& text) {
+  matched_any(patterns, text.data());
 }
 
-template<int N> bool matched_list(std::initializer_list<char const*> const& patterns, fixed_string<N> const& text) {
-  matched_list(patterns, text.data());
-}
-
-inline bool matched_list(std::initializer_list<wchar_t const*> const& patterns, wchar_t const* text) {
+inline bool matched_any(std::initializer_list<wchar_t const*> const& patterns, wchar_t const* text) {
   for(auto const& each_pattern: patterns)
     if(!matched(each_pattern, text))
       return false;
   return true;
 }
 
-inline bool matched_list(std::initializer_list<wchar_t const*> const& patterns, std::wstring const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::initializer_list<wchar_t const*> const& patterns, std::wstring const& text) {
+  matched_any(patterns, text.data());
 }
 
-inline bool matched_list(std::initializer_list<std::string> const& patterns, char const* text) {
+inline bool matched_any(std::initializer_list<std::string> const& patterns, char const* text) {
   for(auto const& each_pattern: patterns)
     if(!matched(each_pattern, text))
       return false;
   return true;
 }
 
-inline bool matched_list(std::initializer_list<std::string> const& patterns, std::string const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::initializer_list<std::string> const& patterns, std::string const& text) {
+  matched_any(patterns, text.data());
 }
 
-template<int N> bool matched_list(std::initializer_list<std::string> const& patterns, fixed_string<N> const& text) {
-  matched_list(patterns, text.data());
-}
-
-inline bool matched_list(std::initializer_list<std::wstring> const& patterns, wchar_t const* text) {
+inline bool matched(std::initializer_list<std::wstring> const& patterns, wchar_t const* text) {
   for(auto const& each_pattern: patterns)
     if(!matched(each_pattern, text))
       return false;
   return true;
 }
 
-inline bool matched_list(std::initializer_list<std::wstring> const& patterns, std::wstring const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::initializer_list<std::wstring> const& patterns, std::wstring const& text) {
+  matched(patterns, text.data());
 }
 
-template<int N> bool matched_list(std::initializer_list<fixed_string<N>> const& patterns, char const* text) {
+inline bool matched_any(std::vector<char const*> const& patterns, char const* text) {
   for(auto const& each_pattern: patterns)
     if(!matched(each_pattern, text))
       return false;
   return true;
 }
 
-template<int N> bool matched_list(std::initializer_list<fixed_string<N>> const& patterns, std::string const& text) {
-  return matched_list(patterns, text.data());
+inline bool matched_any(std::vector<char const*> const& patterns, std::string const& text) {
+  matched_any(patterns, text.data());
 }
 
-template<int N, int M> bool matched_list(std::initializer_list<fixed_string<N>> const& patterns, fixed_string<M> const& text) {
-  return matched_list(patterns, text.data());
-}
-
-inline bool matched_list(std::vector<char const*> const& patterns, char const* text) {
+inline bool matched_any(std::vector<wchar_t const*> const& patterns, wchar_t const* text) {
   for(auto const& each_pattern: patterns)
     if(!matched(each_pattern, text))
       return false;
   return true;
 }
 
-inline bool matched_list(std::vector<char const*> const& patterns, std::string const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::vector<wchar_t const*> const& patterns, std::wstring const& text) {
+  matched_any(patterns, text.data());
 }
 
-template<int N> bool matched_list(std::vector<char const*> const& patterns, fixed_string<N> const& text) {
-  matched_list(patterns, text.data());
-}
-
-inline bool matched_list(std::vector<wchar_t const*> const& patterns, wchar_t const* text) {
+inline bool matched_any(std::vector<std::string> const& patterns, char const* text) {
   for(auto const& each_pattern: patterns)
     if(!matched(each_pattern, text))
       return false;
   return true;
 }
 
-inline bool matched_list(std::vector<wchar_t const*> const& patterns, std::wstring const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::vector<std::string> const& patterns, std::string const& text) {
+  matched_any(patterns, text.data());
 }
 
-inline bool matched_list(std::vector<std::string> const& patterns, char const* text) {
+inline bool matched_any(std::vector<std::wstring> const& patterns, wchar_t const* text) {
   for(auto const& each_pattern: patterns)
     if(!matched(each_pattern, text))
       return false;
   return true;
 }
 
-inline bool matched_list(std::vector<std::string> const& patterns, std::string const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::vector<std::wstring> const& patterns, std::wstring const& text) {
+  matched_any(patterns, text.data());
 }
 
-template<int N> bool matched_list(std::vector<std::string> const& patterns, fixed_string<N> const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::string const& patterns, char const* text) {
+  return matched_any(split(patterns, ','), text);
 }
 
-inline bool matched_list(std::vector<std::wstring> const& patterns, wchar_t const* text) {
-  for(auto const& each_pattern: patterns)
-    if(!matched(each_pattern, text))
-      return false;
-  return true;
+inline bool matched_any(std::string const& patterns, std::string const& text) {
+  return matched_any(split(patterns, ','), text);
 }
 
-inline bool matched_list(std::vector<std::wstring> const& patterns, std::wstring const& text) {
-  matched_list(patterns, text.data());
+inline bool matched_any(std::wstring const& patterns, wchar_t const* text) {
+  return matched_any(split(patterns, ','), text);
 }
 
-template<int N> bool matched_list(std::vector<fixed_string<N>> const& patterns, char const* text) {
-  for(auto const& each_pattern: patterns)
-    if(!matched(each_pattern, text))
-      return false;
-  return true;
-}
-
-template<int N> bool matched_list(std::vector<fixed_string<N>> const& patterns, std::string const& text) {
-  return matched_list(patterns, text.data());
-}
-
-template<int N, int M> bool matched_list(std::vector<fixed_string<N>> const& patterns, fixed_string<M> const& text) {
-  return matched_list(patterns, text.data());
-}
-
-inline bool matched_list(std::string const& patterns, char const* text) {
-  return matched_list(split(patterns, ','), text);
-}
-
-inline bool matched_list(std::string const& patterns, std::string const& text) {
-  return matched_list(split(patterns, ','), text);
-}
-
-template<int N> bool matched_list(std::string const& patterns, fixed_string<N> const& text) {
-  return matched_list(split(patterns, ','), text);
-}
-
-inline bool matched_list(std::wstring const& patterns, wchar_t const* text) {
-  return matched_list(split(patterns, ','), text);
-}
-
-inline bool matched_list(std::wstring const& patterns, std::wstring const& text) {
-  return matched_list(split(patterns, ','), text);
-}
-
-template<int N> bool matched_list(fixed_string<N> const& patterns, char const* text) {
-  return matched_list(split(patterns, ','), text);
-}
-
-template<int N> bool matched_list(fixed_string<N> const& patterns, std::string const& text) {
-  return matched_list(split(patterns, ','), text);
-}
-
-template<int N, int M> bool matched_list(fixed_string<N> const& patterns, fixed_string<M> const& text) {
-  return matched_list(split(patterns, ','), text);
+inline bool matched_any(std::wstring const& patterns, std::wstring const& text) {
+  return matched_any(split(patterns, ','), text);
 }
 
 
