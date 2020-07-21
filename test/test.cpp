@@ -3,3 +3,4 @@
 
 #include "split.hpp"
 #include "wildcards.hpp"
+#include "replace.hpp"
