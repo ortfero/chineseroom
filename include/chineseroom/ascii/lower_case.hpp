@@ -23,9 +23,6 @@
 #pragma once
 
 
-#include "table.hpp"
-
-
 namespace chineseroom::ascii {
   
   
