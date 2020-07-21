@@ -23,7 +23,6 @@
 #pragma once
 
 
-#include <algorithm>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -41,12 +40,20 @@ namespace detail {
     splitted.clear();
     typename S::const_iterator start = source.begin();
     typename S::const_iterator end = source.end();
-    typename S::const_iterator next = std::find(start, end, separator);
+    
+    typename S::const_iterator next = start;
+    
+    while(next != end && *next != separator)
+      ++next;
+    
     while(next != end) {
       if(next - start > 0 || strict)
         splitted.emplace_back(S{start, next});
       start = next + 1;
-      next = std::find(start, end, separator);
+      
+      next = start;
+      while(next != end && *next != separator)
+        ++next;
     }
     if(next - start > 0 || strict)
       splitted.emplace_back(S{start, next});
