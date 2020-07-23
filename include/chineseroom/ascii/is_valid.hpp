@@ -33,7 +33,7 @@ namespace chineseroom::ascii {
     if(string.empty())
       return true;
       
-    for(char* p = string.data(); *p != '\0'; ++p)
+    for(char const* p = string.data(); *p != '\0'; ++p)
       if(*p < 0)
         return false;
     
