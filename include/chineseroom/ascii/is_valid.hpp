@@ -25,38 +25,19 @@
 
 namespace chineseroom::ascii {
   
-  
-  template<typename S>
-  S& lower_case(S& string) noexcept {
+  template<typename S> bool is_valid(S const& string) noexcept {
     
     static_assert(sizeof(typename S::value_type) == 1,
       "Only char based strings are supported");
       
     if(string.empty())
-      return string;
+      return true;
       
-    char* p = string.data();
-    for(;;)
-      switch(*p) {
-        case 'A': case 'B': case 'C': case 'D':
-        case 'E': case 'F': case 'G': case 'H':
-        case 'I': case 'J': case 'K': case 'L':
-        case 'M': case 'N': case 'O': case 'P':
-        case 'Q': case 'R': case 'S': case 'T':
-        case 'U': case 'V': case 'W': case 'X':
-        case 'Y': case 'Z':
-          *p = *p - 'A' + 'a';
-          ++p;
-          continue;
-        case '\0':
-          return string;
-        default:
-          ++p;
-          continue;
-      }
-      
+    for(char* p = string.data(); *p != '\0'; ++p)
+      if(*p < 0)
+        return false;
     
+    return true;
   }
-  
   
 }
